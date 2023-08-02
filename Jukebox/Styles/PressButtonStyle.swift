@@ -12,7 +12,7 @@ struct PressButtonStyle: ButtonStyle {
     func makeBody(configuration: Self.Configuration) -> some View {
         configuration.label
             .scaleEffect(configuration.isPressed ? CGFloat(0.90) : 1.0)
-            .animation(Animation.spring(response: 0.2, dampingFraction: 0.35, blendDuration: 1))
+            .animation(Animation.spring(response: 0.2, dampingFraction: 0.35, blendDuration: 1), value: configuration.isPressed)
     }
 }
 

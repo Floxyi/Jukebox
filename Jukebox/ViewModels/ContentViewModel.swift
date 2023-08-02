@@ -41,7 +41,11 @@ class ContentViewModel: ObservableObject {
     @Published var trackDuration: Double = 0
     @Published var seekerPosition: Double = 0
     
-    private var observer: NSKeyValueObservation?
+    private var observerApp: NSKeyValueObservation?
+    private var observerStyle: NSKeyValueObservation?
+    private var observerWidth: NSKeyValueObservation?
+    private var observerAnimation: NSKeyValueObservation?
+    private var observerSpeed: NSKeyValueObservation?
     
     init() {
         setupMusicApps()
@@ -51,7 +55,11 @@ class ContentViewModel: ObservableObject {
     }
     
     deinit {
-        observer?.invalidate()
+        observerApp?.invalidate()
+        observerStyle?.invalidate()
+        observerWidth?.invalidate()
+        observerAnimation?.invalidate()
+        observerSpeed?.invalidate()
     }
     
     // MARK: - Setup
@@ -69,8 +77,7 @@ class ContentViewModel: ObservableObject {
     }
     
     private func setupObservers() {
-        
-        observer = UserDefaults.standard.observe(\.connectedApp, options: [.old, .new]) { defaults, change in
+        observerApp = UserDefaults.standard.observe(\.connectedApp, options: [.old, .new]) { defaults, change in
             DistributedNotificationCenter.default().removeObserver(self)
             DistributedNotificationCenter.default().addObserver(
                 self,
@@ -79,6 +86,53 @@ class ContentViewModel: ObservableObject {
                 object: nil,
                 suspensionBehavior: .deliverImmediately)
             self.setupMusicApps()
+            self.playStateOrTrackDidChange(nil)
+        }
+        
+        // TODO: rework observers
+        
+        observerStyle = UserDefaults.standard.observe(\.statusTextStyle, options: [.old, .new]) { defaults, change in
+            DistributedNotificationCenter.default().removeObserver(self)
+            DistributedNotificationCenter.default().addObserver(
+                self,
+                selector: #selector(self.playStateOrTrackDidChange),
+                name: NSNotification.Name(rawValue: self.notification),
+                object: nil,
+                suspensionBehavior: .deliverImmediately)
+            self.playStateOrTrackDidChange(nil)
+            self.updateMenuBarText()
+        }
+        
+        observerWidth = UserDefaults.standard.observe(\.statusBarWidthLimit, options: [.old, .new]) { defaults, change in
+            DistributedNotificationCenter.default().removeObserver(self)
+            DistributedNotificationCenter.default().addObserver(
+                self,
+                selector: #selector(self.playStateOrTrackDidChange),
+                name: NSNotification.Name(rawValue: self.notification),
+                object: nil,
+                suspensionBehavior: .deliverImmediately)
+            self.playStateOrTrackDidChange(nil)
+        }
+        
+        observerAnimation = UserDefaults.standard.observe(\.showAnimation, options: [.old, .new]) { defaults, change in
+            DistributedNotificationCenter.default().removeObserver(self)
+            DistributedNotificationCenter.default().addObserver(
+                self,
+                selector: #selector(self.playStateOrTrackDidChange),
+                name: NSNotification.Name(rawValue: self.notification),
+                object: nil,
+                suspensionBehavior: .deliverImmediately)
+            self.playStateOrTrackDidChange(nil)
+        }
+        
+        observerSpeed = UserDefaults.standard.observe(\.statusBarTextSpeed, options: [.old, .new]) { defaults, change in
+            DistributedNotificationCenter.default().removeObserver(self)
+            DistributedNotificationCenter.default().addObserver(
+                self,
+                selector: #selector(self.playStateOrTrackDidChange),
+                name: NSNotification.Name(rawValue: self.notification),
+                object: nil,
+                suspensionBehavior: .deliverImmediately)
             self.playStateOrTrackDidChange(nil)
         }
                 

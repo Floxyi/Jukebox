@@ -19,7 +19,6 @@ struct ContentView: View {
     // States for animations
     @State private var isShowingPlaybackControls = false
     
-    // States for seeker dragging
     @State private var isDraggingSeeker = false
     @State private var currentSeekerPosition: CGFloat = 0
     @State private var draggingSeekerProgress: Double = 0
@@ -187,7 +186,7 @@ struct ContentView: View {
                             
                         }
                         
-                        Spacer()
+                        Spacer().frame(height: 15)
                         
                         // Track details
                         VStack(alignment: .center) {

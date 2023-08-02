@@ -14,6 +14,11 @@ struct PreferencesView: View {
     
     @AppStorage("visualizerStyle") private var visualizerStyle = VisualizerStyle.albumArt
     @AppStorage("connectedApp") private var connectedApp = ConnectedApps.spotify
+    @AppStorage("statusTextStyle") private var statusTextStyle = StatusTextStyle.titleWithArtist
+    @AppStorage("showAnimation") private var showAnimation = true
+    @AppStorage("statusBarWidthLimit") private var statusBarWidthLimit = 200.0
+    @AppStorage("statusBarTextSpeed") private var statusBarTextSpeed = 80.0
+    
     @State private var alertTitle = Text("Title")
     @State private var alertMessage = Text("Message")
     @State private var showingAlert = false
@@ -152,14 +157,34 @@ struct PreferencesView: View {
             
             // Visualizer Pane
             VStack(alignment: .leading) {
-                Text("Background")
+                Text("App Style")
                     .font(.title2)
                     .fontWeight(.semibold)
-                Picker("Style", selection: $visualizerStyle) {
+                
+                Picker("Popup Background", selection: $visualizerStyle) {
                     ForEach(VisualizerStyle.allCases, id: \.self) { value in
                         Text(value.localizedName).tag(value)
                     }
                 }
+                
+                Picker("Menu Bar Text", selection: $statusTextStyle) {
+                    ForEach(StatusTextStyle.allCases, id: \.self) { value in
+                        Text(value.localizedName).tag(value)
+                    }
+                }
+                
+                Toggle("Menu Bar Icon Animation", isOn: $showAnimation)
+                
+                HStack {
+                    Text("Max Menu Bar Size")
+                    Slider(value: $statusBarWidthLimit, in: 100...Constants.StatusBar.statusBarMaxWidth, step: 20)
+                }
+                
+                HStack {
+                    Text("Menu Bar Text Speed")
+                    Slider(value: $statusBarTextSpeed, in: 10...100, step: 10)
+                }
+                .padding(.bottom)
             }
             .padding()
             
