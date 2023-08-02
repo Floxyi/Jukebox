@@ -66,20 +66,41 @@ struct ContentView: View {
                             
                             // Playback Buttons
                             HStack(spacing: 6) {
-                                if case connectedApp = ConnectedApps.appleMusic {
+                                if case connectedApp = ConnectedApps.spotify {
+                                    let shuffling = contentViewVM.spotifyApp?.shuffling
+                                    
                                     Button {
-                                        contentViewVM.toggleLoveTrack()
+                                        contentViewVM.spotifyApp?.setShuffling?(!shuffling!)
                                     } label: {
-                                        Image(systemName: contentViewVM.isLoved ? "heart.fill" : "heart")
+                                        Image(systemName: shuffling! ? "shuffle.circle.fill" : "shuffle.circle")
                                             .font(.system(size: 14))
                                             .foregroundColor(.primary.opacity(primaryOpacity))
-                                    }.pressButtonStyle()
+                                    }
+                                    .pressButtonStyle()
+                                    
+                                    Spacer().frame(width: 2)
                                 }
+                                
+                                if case connectedApp = ConnectedApps.appleMusic {
+                                    let shuffling = contentViewVM.appleMusicApp?.shuffleEnabled
+                                    
+                                    Button {
+                                        contentViewVM.appleMusicApp?.setShuffleEnabled?(!shuffling!)
+                                    } label: {
+                                        Image(systemName: shuffling! ? "shuffle.circle.fill" : "shuffle.circle")
+                                            .font(.system(size: 14))
+                                            .foregroundColor(.primary.opacity(primaryOpacity))
+                                    }
+                                    .pressButtonStyle()
+                                    
+                                    Spacer().frame(width: 2)
+                                }
+                                
                                 Button {
                                     contentViewVM.previousTrack()
                                 } label: {
                                     Image(systemName: "backward.end.fill")
-                                        .font(.system(size: 14))
+                                        .font(.system(size: 16))
                                         .foregroundColor(.primary.opacity(primaryOpacity))
                                 }
                                 .pressButtonStyle()
@@ -88,7 +109,7 @@ struct ContentView: View {
                                     contentViewVM.togglePlayPause()
                                 } label: {
                                     Image(systemName: contentViewVM.isPlaying ? "pause.fill" : "play.fill")
-                                        .font(.system(size: 22))
+                                        .font(.system(size: 26))
                                         .foregroundColor(.primary.opacity(primaryOpacity))
                                         .frame(width: 25, height: 25)
                                 }
@@ -98,10 +119,49 @@ struct ContentView: View {
                                     contentViewVM.nextTrack()
                                 } label: {
                                     Image(systemName: "forward.end.fill")
-                                        .font(.system(size: 14))
+                                        .font(.system(size: 16))
                                         .foregroundColor(.primary.opacity(primaryOpacity))
                                 }
                                 .pressButtonStyle()
+                                
+                                if case connectedApp = ConnectedApps.spotify {
+                                    let repeating = contentViewVM.spotifyApp?.repeating
+                                    
+                                    Spacer().frame(width: 2)
+                                    
+                                    Button {
+                                        contentViewVM.spotifyApp?.setRepeating?(!repeating!)
+                                    } label: {
+                                        Image(systemName: repeating! ? "repeat.circle.fill" : "repeat.circle")
+                                            .font(.system(size: 14))
+                                            .foregroundColor(.primary.opacity(primaryOpacity))
+                                    }
+                                    .pressButtonStyle()
+                                }
+                                
+                                if case connectedApp = ConnectedApps.appleMusic {
+                                    let repeating = contentViewVM.appleMusicApp?.songRepeat
+                                    
+                                    Spacer().frame(width: 2)
+                                    
+                                    Button {
+                                        if repeating == .all {
+                                            contentViewVM.appleMusicApp?.setSongRepeat!(.one)
+                                        } else if repeating == .one {
+                                            contentViewVM.appleMusicApp?.setSongRepeat!(.off)
+                                        } else if repeating == .off {
+                                            contentViewVM.appleMusicApp?.setSongRepeat!(.all)
+                                        } else {
+                                            contentViewVM.appleMusicApp?.setSongRepeat!(.off)
+                                        }
+                                    } label: {
+                                        Image(systemName: repeating! == .all ? "repeat.circle.fill" : repeating! == .one ? "repeat.1.circle.fill" : "repeat.circle")
+                                            .font(.system(size: 14))
+                                            .foregroundColor(.primary.opacity(primaryOpacity))
+                                    }
+                                    .pressButtonStyle()
+                                }
+                                
                             }
                             .padding(.horizontal, 14)
                             .padding(.vertical, 6)
