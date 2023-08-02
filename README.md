@@ -25,7 +25,7 @@ The app shows the currently playing song in the menu bar. Clicking the menu bar 
 </p>
 
 The preferences menu can be opened by right clicking the menu bar item.
-From here you can change which app Jukebox gets music data from and the background that appears behind the album art.
+From here you can change which app Jukebox gets music data from and various style related preferences.  
 Clicking the button next to the connect option gives you the prompt to connect the music app you choose.
 
 ## Attributions
