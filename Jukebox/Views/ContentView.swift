@@ -19,6 +19,16 @@ struct ContentView: View {
     // States for animations
     @State private var isShowingPlaybackControls = false
     
+    // States for seeker dragging
+    @State private var isDraggingSeeker = false
+    @State private var currentSeekerPosition: CGFloat = 0
+    @State private var draggingSeekerProgress: Double = 0
+    
+    @GestureState private var dragOffset: CGSize = .zero
+    @State private var isDragging = false
+    @State private var isUpdatingPosition = false
+    @State private var newPosition: Double = 0
+    
     // Constants
     let primaryOpacity = 0.8
     let primaryOpacity2 = 0.6
@@ -181,24 +191,184 @@ struct ContentView: View {
                         
                         // Track details
                         VStack(alignment: .center) {
-                            Text(contentViewVM.track.title)
-                                .foregroundColor(.primary.opacity(primaryOpacity))
-                                .font(.system(size: 15, weight: .bold))
-                                .lineLimit(1)
-                            Text(contentViewVM.track.artist)
-                                .font(.headline)
-                                .fontWeight(.medium)
-                                .lineLimit(1)
-                                .foregroundColor(.primary.opacity(primaryOpacity2))
-                            Text("\(formatSecondsForDisplay(contentViewVM.seekerPosition)) / \(formatSecondsForDisplay(contentViewVM.trackDuration))")
-                                .foregroundColor(.primary.opacity(primaryOpacity2))
-                                .font(.subheadline)
-                                .padding(.top, 2)
+                            HStack(alignment: .center) {
+                                Text(contentViewVM.track.title)
+                                    .foregroundColor(.primary.opacity(primaryOpacity))
+                                    .font(.system(size: 15, weight: .bold))
+                                    .lineLimit(1)
+                                
+                                if contentViewVM.track.artist != "" {
+                                    Circle()
+                                       .foregroundColor(.primary)
+                                       .frame(width: 4, height: 4)
+                                    Text(contentViewVM.track.artist)
+                                        .font(.body)
+                                        .fontWeight(.medium)
+                                        .lineLimit(1)
+                                        .foregroundColor(.primary.opacity(primaryOpacity2))
+                                }
+                                
+                            }
+                            .padding(.top, 10)
+
+                            GeometryReader { geometry in
+                                ZStack(alignment: .leading) {
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .foregroundColor(.gray.opacity(0.4))
+                                        .frame(height: 6)
+                                        .gesture(DragGesture(minimumDistance: 0)
+                                            .onChanged({ value in
+                                                isDraggingSeeker = true
+                                                NSCursor.pointingHand.set()
+                                                
+                                                currentSeekerPosition = min(max(value.location.x, 0), geometry.size.width)
+                                                
+                                                draggingSeekerProgress = Double(currentSeekerPosition / geometry.size.width)
+                                            })
+                                            .onEnded({ value in
+                                                currentSeekerPosition = min(max(value.location.x, 0), geometry.size.width)
+                                                let newPosition = currentSeekerPosition / geometry.size.width * contentViewVM.trackDuration
+                                                contentViewVM.seekerPosition = newPosition
+                                                
+                                                if case connectedApp = ConnectedApps.spotify {
+                                                    contentViewVM.spotifyApp?.setPlayerPosition?(newPosition)
+                                                }
+                                                
+                                                if case connectedApp = ConnectedApps.appleMusic {
+                                                    contentViewVM.appleMusicApp?.setPlayerPosition?(newPosition)
+                                                }
+                                                
+                                                NSCursor.arrow.set()
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                                    isDraggingSeeker = false
+                                                }
+                                            })
+                                        )
+                                    
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .foregroundColor(.white)
+                                        .frame(width: isDraggingSeeker ? currentSeekerPosition : geometry.size.width * CGFloat(isDraggingSeeker ? draggingSeekerProgress : (contentViewVM.seekerPosition / contentViewVM.trackDuration)), height: 6)
+                                        .gesture(
+                                            DragGesture(minimumDistance: 0)
+                                                .onChanged({ value in
+                                                    isDraggingSeeker = true
+                                                    NSCursor.pointingHand.set()
+
+                                                    currentSeekerPosition = min(max(value.location.x, 0), geometry.size.width)
+
+                                                    draggingSeekerProgress = Double(currentSeekerPosition / geometry.size.width)
+                                                })
+                                                .onEnded({ value in
+                                                    currentSeekerPosition = min(max(value.location.x, 0), geometry.size.width)
+                                                    let newPosition = currentSeekerPosition / geometry.size.width * contentViewVM.trackDuration
+                                                    contentViewVM.seekerPosition = newPosition
+
+                                                    if case connectedApp = ConnectedApps.spotify {
+                                                        contentViewVM.spotifyApp?.setPlayerPosition?(newPosition)
+                                                    }
+
+                                                    if case connectedApp = ConnectedApps.appleMusic {
+                                                        contentViewVM.appleMusicApp?.setPlayerPosition?(newPosition)
+                                                    }
+
+                                                    NSCursor.arrow.set()
+                                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                                        isDraggingSeeker = false
+                                                    }
+                                                })
+                                        )
+                                    
+                                    Circle()
+                                        .foregroundColor(.white)
+                                        .frame(width: 10, height: 10)
+                                        .offset(x: isDraggingSeeker ? currentSeekerPosition - 8 : (geometry.size.width * CGFloat(contentViewVM.seekerPosition / contentViewVM.trackDuration) - 8))
+                                        .gesture(DragGesture()
+                                            .onChanged({ value in
+                                                isDraggingSeeker = true
+                                                NSCursor.pointingHand.set()
+                                                
+                                                currentSeekerPosition = min(max(value.location.x, 0), geometry.size.width)
+                                                
+                                                draggingSeekerProgress = Double(currentSeekerPosition / geometry.size.width)
+                                            })
+                                            .onEnded({ value in
+                                                currentSeekerPosition = min(max(value.location.x, 0), geometry.size.width)
+                                                let newPosition = currentSeekerPosition / geometry.size.width * contentViewVM.trackDuration
+                                                contentViewVM.seekerPosition = newPosition
+                                                
+                                                if case connectedApp = ConnectedApps.spotify {
+                                                    contentViewVM.spotifyApp?.setPlayerPosition?(newPosition)
+                                                }
+                                                
+                                                if case connectedApp = ConnectedApps.appleMusic {
+                                                    contentViewVM.appleMusicApp?.setPlayerPosition?(newPosition)
+                                                }
+                                                
+                                                NSCursor.arrow.set()
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                                    isDraggingSeeker = false
+                                                }
+                                            })
+                                        )
+                                }
+                            }
+                            .padding(.horizontal, 10)
+                            
+                            Spacer(minLength: 15)
+                            
+                            HStack(alignment: .center) {
+                                HStack(spacing: 2) {
+                                    Button(action: {
+                                        contentViewVM.setPlayerVolume(contentViewVM.getPlayerVolume() - 10)
+                                    }) {
+                                        Image(systemName: "speaker.wave.1.fill")
+                                            .frame(width: 8, height: 8)
+                                    }
+
+                                    Button(action: {
+                                        contentViewVM.setPlayerVolume(contentViewVM.getPlayerVolume() + 10)
+                                    }) {
+                                        Image(systemName: "speaker.wave.3.fill")
+                                            .frame(width: 8, height: 8)
+                                    }
+                                }
+                                
+                                Spacer()
+                                
+                                Text(!isDraggingSeeker ? "\(formatSecondsForDisplay(contentViewVM.seekerPosition)) / \(formatSecondsForDisplay(contentViewVM.trackDuration))" : "\(formatSecondsForDisplay(contentViewVM.trackDuration * draggingSeekerProgress)) / \(formatSecondsForDisplay(contentViewVM.trackDuration))")
+                                    .foregroundColor(.primary.opacity(primaryOpacity2))
+                                    .font(.system(size: 12))
+                                
+                                Spacer()
+                                
+                                if case connectedApp = ConnectedApps.spotify {
+                                    Button(action: {
+                                        let spotifyURL = URL(string: "spotify://")!
+                                        NSWorkspace.shared.open(spotifyURL)
+                                    }) {
+                                        Image(systemName: "arrow.up.forward.app.fill")
+                                            .frame(width: 34, height: 8)
+                                    }
+                                }
+                                
+                                if case connectedApp = ConnectedApps.appleMusic {
+                                    Button(action: {
+                                        contentViewVM.appleMusicApp?.currentTrack?.setLoved!(!(contentViewVM.appleMusicApp?.currentTrack?.loved)!)
+                                    }) {
+                                        Image(systemName: (contentViewVM.appleMusicApp?.currentTrack?.loved)! ? "heart.fill" : "heart")
+                                            .frame(width: 34, height: 8)
+                                    }
+                                }
+
+                            }
+                            .padding(10)
+                            .padding(.bottom, 5)
                         }
-                        .frame(width: 216, height: 68, alignment: .center)
+                        .frame(width: 216, height: 78, alignment: .center)
                         .offset(y: 1)
-                        .padding(.horizontal, 8)
-                        
+                        .padding(12)
+                        .background(Color.black.opacity(0.2))
+                        .cornerRadius(10)
                     }
                     
                 }

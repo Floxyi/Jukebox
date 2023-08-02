@@ -241,6 +241,24 @@ class ContentViewModel: ObservableObject {
         }
     }
     
+    func setPlayerVolume(_ newValue: Int) {
+        switch connectedApp {
+        case .appleMusic:
+            appleMusicApp?.setSoundVolume!(newValue)
+        case .spotify:
+            spotifyApp?.setSoundVolume!(newValue)
+        }
+    }
+    
+    func getPlayerVolume() -> Int {
+        switch connectedApp {
+        case .appleMusic:
+            return (appleMusicApp?.soundVolume)!
+        case .spotify:
+            return (spotifyApp?.soundVolume)!
+        }
+    }
+    
     // MARK: - Seeker
     
     func getCurrentSeekerPosition() {
