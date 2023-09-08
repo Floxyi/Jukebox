@@ -65,23 +65,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func setupStatusBar() {
         // Initialize Status Bar Menu
         statusBarMenu = NSMenu()
+        
         statusBarMenu.delegate = self
         let hostedAboutView = NSHostingView(rootView: AboutView())
         hostedAboutView.frame = NSRect(x: 0, y: 0, width: 220, height: 70)
+        
         let aboutMenuItem = NSMenuItem()
         aboutMenuItem.view = hostedAboutView
         statusBarMenu.addItem(aboutMenuItem)
+        
         statusBarMenu.addItem(NSMenuItem.separator())
+        
         let updates = NSMenuItem(
             title: "Check for updates...",
             action: #selector(SUUpdater.checkForUpdates(_:)),
             keyEquivalent: "")
         updates.target = SUUpdater.shared()
         statusBarMenu.addItem(updates)
+        
         statusBarMenu.addItem(
             withTitle: "Preferences...",
             action: #selector(showPreferences),
             keyEquivalent: "")
+        
         statusBarMenu.addItem(
             withTitle: "Quit Jukebox",
             action: #selector(NSApplication.terminate),
@@ -97,7 +103,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let barInformation = StatusBarInformation(
                 menubarAppearance: statusBarItemButton.effectiveAppearance,
                 menubarHeight: statusBarItemButton.bounds.height,
-                isPlaying: false)
+                isPlaying: false
+            )
             
             statusBarItemButton.addSubview(barInformation)
             
@@ -163,7 +170,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // Get track data from notification
         guard let trackTitle = notification.userInfo?["title"] as? String else { return }
         guard let trackArtist = notification.userInfo?["artist"] as? String else { return }
-        guard let isPlaying = notification.userInfo?["isPlaying"] as? Bool  else { return }
+        guard let isPlaying = notification.userInfo?["isPlaying"] as? Bool else { return }
         
         var menuText = ""
 

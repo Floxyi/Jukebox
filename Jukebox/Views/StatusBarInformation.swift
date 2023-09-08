@@ -16,8 +16,6 @@ class StatusBarInformation: NSView {
     @AppStorage("statusBarWidthLimit") private var statusBarWidthLimit = 200.0
     @AppStorage("statusBarTextSpeed") private var statusBarTextSpeed = 80.0
     
-    @ObservedObject var contentViewVM: ContentViewModel
-    
     // Invalidating Variables
     var menubarIsDarkAppearance: Bool {
         didSet {
@@ -61,7 +59,6 @@ class StatusBarInformation: NSView {
         self.menubarIsDarkAppearance = menubarAppearance.name == .vibrantDark ? true : false
         self.isPlaying = isPlaying
         self.menubarHeight = menubarHeight
-        self.contentViewVM = ContentViewModel()
         
         super.init(frame: CGRect(
             x: Constants.StatusBar.statusBarButtonPadding,
@@ -76,7 +73,7 @@ class StatusBarInformation: NSView {
     func animate() {
         self.layer?.sublayers?.removeAll()
         bars.removeAll()
-
+        
         if isPlaying {
             let mainLayer = CALayer()
 
@@ -107,7 +104,7 @@ class StatusBarInformation: NSView {
             return
         }
         
-        if !isPlaying && !menuText.isEmpty {
+        if !isPlaying {
             let mainLayer = CALayer()
             
             let symbolLayer = createPauseSymbolLayer()

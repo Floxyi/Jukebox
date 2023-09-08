@@ -48,7 +48,6 @@ class ContentViewModel: ObservableObject {
     private var observerSpeed: NSKeyValueObservation?
     
     init() {
-        setupMusicApps()
         setupObservers()
         guard isRunning else { return }
         playStateOrTrackDidChange(nil)
@@ -87,6 +86,7 @@ class ContentViewModel: ObservableObject {
                 suspensionBehavior: .deliverImmediately)
             self.setupMusicApps()
             self.playStateOrTrackDidChange(nil)
+            self.updateMenuBarText()
         }
         
         // TODO: rework observers
@@ -197,6 +197,7 @@ class ContentViewModel: ObservableObject {
             self.track.title = spotifyApp?.currentTrack?.name ?? "Unknown Title"
             self.track.artist = spotifyApp?.currentTrack?.artist ?? "Unknown Artist"
             self.track.album = spotifyApp?.currentTrack?.album ?? "Unknown Album"
+            
             if let artworkURLString = spotifyApp?.currentTrack?.artworkUrl,
                let url = URL(string: artworkURLString) {
                 URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
@@ -221,9 +222,11 @@ class ContentViewModel: ObservableObject {
             self.track.artist = appleMusicApp?.currentTrack?.artist ?? "Unknown Artist"
             self.track.album = appleMusicApp?.currentTrack?.album ?? "Unknown Album"
             self.isLoved = appleMusicApp?.currentTrack?.loved ?? false
+            
             // Might have to change this later...
             var count = 0
             var waitForData: (() -> Void)!
+            
             waitForData = {
                 let art = self.appleMusicApp?.currentTrack?.artworks?()[0] as! MusicArtwork
                 if art.data != nil && !art.data!.isEmpty() {
@@ -236,6 +239,7 @@ class ContentViewModel: ObservableObject {
                 }
                 count += 1
             }
+            
             waitForData()
             
             // Seeker
@@ -250,9 +254,22 @@ class ContentViewModel: ObservableObject {
     
     private func updateMenuBarText() {
         DispatchQueue.main.async { [weak self] in
-            guard let title = self?.track.title, let artist = self?.track.artist, let isPlaying = self?.isPlaying else { return }
-            let trackInfo: [String: Any] = ["title": title, "artist": artist, "isPlaying": isPlaying]
-            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "TrackChanged"), object: nil, userInfo: trackInfo)
+            
+            guard let title = self?.track.title else { return }
+            guard let artist = self?.track.artist else { return }
+            guard let isPlaying = self?.isPlaying else { return }
+            
+            let trackInfo: [String: Any] = [
+                "title": title,
+                "artist": artist,
+                "isPlaying": isPlaying,
+            ]
+            
+            NotificationCenter.default.post(
+                name: NSNotification.Name(rawValue: "TrackChanged"),
+                object: nil,
+                userInfo: trackInfo
+            )
         }
     }
     
