@@ -158,7 +158,6 @@ class StatusBarInformation: NSView {
             width: 20,
             height: 20)
         
-        // Create a mask layer with a cutout at the bottom
         let maskLayer = CAShapeLayer()
         let maskPath = CGMutablePath()
         maskPath.addRect(CGRect(x: -2, y: 1, width: 12, height: 16))
@@ -167,7 +166,6 @@ class StatusBarInformation: NSView {
         maskLayer.path = maskPath
         maskLayer.fillRule = .evenOdd
         
-        // Apply the mask to the symbol layer
         symbolLayer.mask = maskLayer
         
         mainLayer.addSublayer(backgroundLayer)
@@ -176,7 +174,6 @@ class StatusBarInformation: NSView {
         return mainLayer
     }
 
-    // TODO: check for multiple texts below each other
     func composeTextLayer() -> CALayer {
         let mainLayer = CALayer()
         

@@ -48,7 +48,6 @@ class MenuMarqueeText: NSView {
     }
     
     init(text: String, menubarBounds: NSRect, menubarAppearance: NSAppearance) {
-        
         self.text = text
         self.menubarBounds = menubarBounds
         self.menubarIsDarkAppearance  = menubarAppearance.name == .vibrantDark ? true : false
